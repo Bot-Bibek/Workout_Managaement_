@@ -1,23 +1,23 @@
 const express = require('express');
-const { createWorkout, getWorkout, getWorkoutById, deleteWorkout } = require('../controllers/WorkoutController');
 
+const { createWorkout, getWorkouts, getWorkoutById, deleteWorkout, updateWorkout } = require('../controllers/workoutController');
+
+const requireAuth = require('../middleware/requireAuth');
 
 const router = express.Router();
 
-router.get('/',getWorkout)
+router.use(requireAuth);
 
-router.get('/:id', getWorkoutById);
-
-
-
-router.patch('/:id', (req, res) => {
-    res.json({msg:`Update route with id: ${req.params.id}`});
-}   );
-
-router.delete('/:id', deleteWorkout)
-
+//get all routes
+router.get('/', getWorkouts)
+//get a single route
+router.get('/:id', getWorkoutById)
+//add a new route 
 router.post('/', createWorkout)
+//delete a route
+router.delete('/:id', deleteWorkout)
+//update a route
+router.patch('/:id', updateWorkout)
 
-
-module.exports = router;
-
+//export the router
+module.exports =router;

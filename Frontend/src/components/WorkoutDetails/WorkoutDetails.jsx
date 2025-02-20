@@ -1,46 +1,85 @@
-/** @format */
-
 import React from "react";
-import { FaDumbbell, FaCalendarAlt } from "react-icons/fa"; // Icons for load and date
-import { MdFitnessCenter, MdDelete } from "react-icons/md"; // Icons for workout name and delete
-import { BiDetail } from "react-icons/bi"; // Icon for description
+import { FaDumbbell, FaCalendarAlt } from "react-icons/fa";
+import { MdFitnessCenter, MdDelete } from "react-icons/md";
+import { BiDetail } from "react-icons/bi";
 import { useWorkoutsContext } from "../../Hooks/UseWorkoutContext";
+import { useAuthContext } from "../../Hooks/UseAuthContext";
+import { toast } from "react-toastify";
 
 const WorkoutDetails = ({ workout }) => {
   const { dispatch } = useWorkoutsContext();
+  const { user } = useAuthContext();
 
   const handleClick = async () => {
-    const response = await fetch(
-      "http://localhost:4000/api/workout/" + workout._id,
-      {
-        method: "DELETE",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
+    if (!user) {
+      toast.error("You must be logged in to delete workouts.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+      return;
     }
 
-    dispatch({ type: "DELETE_WORKOUT", payload: { _id: workout._id } });
+    try {
+      const response = await fetch(
+        "https://workout-buddy-beryl.vercel.app/api/workouts/" + workout._id,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete workout.");
+      }
+
+      dispatch({ type: "DELETE_WORKOUT", payload: { _id: workout._id } });
+
+      toast.success("Workout deleted successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+    } catch (error) {
+      toast.error("Failed to delete workout. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+    }
   };
 
-  // Format the date
   const formattedDate = new Date(workout.createdAt).toLocaleDateString(
     "en-US",
     {
-      weekday: "long",
+      weekday: "short",
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     }
   );
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-2 border border-gray-200">
+    <div className="max-w-lg mx-auto bg-white p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-2 border border-gray-200 relative">
       {/* Delete Icon */}
       <span
         className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-red-600 transition duration-200"
-        onClick={handleClick}>
+        onClick={handleClick}
+      >
         <MdDelete className="text-xl" />
       </span>
 

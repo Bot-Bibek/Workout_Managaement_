@@ -15,6 +15,7 @@ app.use("/api/workout", workoutRouter);
 
 app.use("/api/users", userRoutes);
 
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
